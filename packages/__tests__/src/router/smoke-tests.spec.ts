@@ -7951,7 +7951,7 @@ describe('router/smoke-tests.spec.ts', function () {
       }
     }
 
-    @route({ path: ['parent', 'parent/:id'], routes: [Child] })
+    @route({ id: 'parent', path: ['parent', 'parent/:id'], routes: [Child] })
     @customElement({ name: 'par-ent', template: 'parent ${id} <au-viewport></au-viewport>' })
     class Parent implements IRouteViewModel {
       public id: string | undefined;
@@ -7970,7 +7970,7 @@ describe('router/smoke-tests.spec.ts', function () {
     assert.html.textContent(host, '', 'init');
 
     await router.load('parent/child/123');
-    assert.html.textContent(host, 'parent 123 child', 'after navigation to parent/child route');
+    assert.html.textContent(host, 'parent child 123', 'after navigation to parent/child route');
 
     await au.stop(true);
   });

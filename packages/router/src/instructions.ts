@@ -316,7 +316,30 @@ export class ViewportInstructionTree {
 
     if (typeof instructionOrInstructions === 'string') {
       const expr = RouteExpression.parse(routerOptions._urlParser.parse(instructionOrInstructions));
-      return expr.toInstructionTree(options as NavigationOptions);
+      const parsedInstructions = expr.root._toInstructions(0, 0);
+      const query = mergeURLSearchParams(new URLSearchParams(expr.queryParams), (options as NavigationOptions).queryParams, true);
+      const fragment = expr.fragment ?? (options as NavigationOptions).fragment;
+
+      const len = parsedInstructions.length;
+      const children = new Array(len);
+      const promises: (Promise<void> | void)[] = new Array(len);
+      for (let i = 0; i < len; i++) {
+        const instruction = parsedInstructions[i];
+        promises[i] = onResolve(
+          hasContext ? context.routeConfigContext._generateViewportInstruction(instruction, traverseChildren as true) : null,
+          eagerVi => {
+            if (eagerVi !== null) {
+              children[i] = eagerVi.vi;
+              mergeURLSearchParams(query, eagerVi.query, false);
+            } else {
+              children[i] = ViewportInstruction.create(instruction);
+            }
+          }
+        );
+      }
+      return onResolve(
+        onResolveAll(...promises),
+        () => new ViewportInstructionTree(options as NavigationOptions, false, children, query, fragment));
     }
 
     return onResolve(
