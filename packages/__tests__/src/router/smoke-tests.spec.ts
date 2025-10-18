@@ -7940,7 +7940,7 @@ describe('router/smoke-tests.spec.ts', function () {
   }
 
   // issue #2273
-  it.only('navigating to parent/child route works when parent is configured with paths: ["parent", "parent/:id"]', async function () {
+  it('navigating to parent/child route works when parent is configured with paths: ["parent", "parent/:id"]', async function () {
 
     @route('child/:id')
     @customElement({ name: 'chi-ld', template: 'child ${id}' })
