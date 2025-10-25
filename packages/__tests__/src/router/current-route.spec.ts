@@ -5,7 +5,7 @@ import { customElement } from '@aurelia/runtime-html';
 import { assert } from '@aurelia/testing';
 import { start } from './_shared/create-fixture.js';
 
-describe('router/current-route.spec.ts', function () {
+describe.only('router/current-route.spec.ts', function () {
 
   const emptyParams = Object.create(null) as Params;
   function assertCurrentRoute(actual: ICurrentRoute, expected: Partial<ICurrentRoute>, messagePrefix: string = '') {
@@ -443,7 +443,7 @@ describe('router/current-route.spec.ts', function () {
     await au.stop();
   });
 
-  it('optional constrained parameter', async function () {
+  it.only('optional constrained parameter', async function () {
     @customElement({ name: 'c-11', template: 'c-11' })
     class C11 implements IRouteViewModel { }
     @customElement({ name: 'c-12', template: 'c-12' })

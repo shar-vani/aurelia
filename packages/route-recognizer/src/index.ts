@@ -558,6 +558,7 @@ export class RouteRecognizer<T> {
   }
 
   public append(child: RouteRecognizer<T>): void {
+    // TODO: append the child router only in combination with parent routes
     this.children.push(child);
     this.cache.clear();
   }
