@@ -10,7 +10,7 @@ export class Parameter {
     public readonly isOptional: boolean,
     public readonly isStar: boolean,
     public readonly pattern: RegExp | null,
-  ){}
+  ) { }
 
   public satisfiesPattern(value: string): boolean {
     if (this.pattern === null) return true;
@@ -24,7 +24,7 @@ export class ConfigurableRoute<T> implements IConfigurableRoute<T> {
     public readonly path: string,
     public readonly caseSensitive: boolean,
     public handler: T,
-  ) {}
+  ) { }
 }
 
 export class Endpoint<T> {
@@ -39,7 +39,7 @@ export class Endpoint<T> {
   public constructor(
     public readonly route: ConfigurableRoute<T>,
     public readonly params: readonly Parameter[],
-  ) {}
+  ) { }
 
   public equalsOrResidual(other: Endpoint<T> | null | undefined): boolean {
     return other != null && this === other || this._residualEndpoint === other;
@@ -48,8 +48,10 @@ export class Endpoint<T> {
 
 export class RecognizedRoute<T> {
   public readonly params: Readonly<Record<string, string | undefined>>;
+  public readonly path: string;
   public constructor(
     public readonly endpoint: Endpoint<T>,
+    path: string,
     params: Readonly<Record<string, string | undefined>>,
   ) {
     const $params: Record<string, string | undefined> = Object.create(null);
@@ -58,18 +60,23 @@ export class RecognizedRoute<T> {
       $params[key] = value != null ? decodeURIComponent(value) : value;
     }
     this.params = Object.freeze($params);
+
+    path = path.startsWith('/') ? path.slice(1) : path;
+    path = path.endsWith('/') ? path.slice(0, -1) : path;
+    this.path = path;
   }
 }
 
 class Candidate<T> {
+  public childRoutes: RecognizedRoute<T>[] = [];
   public head: AnyState<T>;
   public endpoint: Endpoint<T>;
-  private params: Record<string, string | undefined> | null = null;
+  private recognizedResult: [RecognizedRoute<T>[], AnyState<T>] | null = null;
   private isConstrained: boolean = false;
   private satisfiesConstraints: boolean | null = null;
 
   public constructor(
-    private readonly chars: string[],
+    /** @internal */ public readonly chars: string[],
     private readonly states: AnyState<T>[],
     private readonly skippedStates: DynamicState<T>[],
     private readonly result: RecognizeResult<T>,
@@ -173,50 +180,69 @@ class Candidate<T> {
     }
     collectSkippedStates(this.skippedStates, this.head);
     if (!this.isConstrained) return true;
-    this._getParams();
+    this._getRoutes();
     return this.satisfiesConstraints!;
   }
 
   /** @internal */
-  public _getParams(): Record<string, string | undefined> {
-    let params = this.params;
-    if (params != null) return params;
+  public _getRoutes(): [RecognizedRoute<T>[], AnyState<T>] | null {
+    let result = this.recognizedResult;
+    if (result != null) return result;
     const { states, chars, endpoint } = this;
 
-    params = {};
     this.satisfiesConstraints = true;
-    // First initialize all properties with undefined so they all exist (even if they're not filled, e.g. non-matched optional params)
-    for (const param of endpoint.params) {
-      params[param.name] = void 0;
-    }
+    const routes = [];
 
-    for (let i = 0, ii = states.length; i < ii; ++i) {
+    let path = '';
+    let currentEndpoint: Endpoint<T> | null = null;
+    let currentParams: Record<string, string | undefined> = {};
+    for (let i = states.length - 1, ii = 0; i >= ii; --i) {
       const state = states[i];
+      if (state.endpoint !== null && !Object.is(state.endpoint.route.handler, currentEndpoint?.route.handler)) {
+        if (currentEndpoint !== null) {
+          routes.unshift(new RecognizedRoute<T>(currentEndpoint, path, currentParams));
+        }
+        currentEndpoint = state.endpoint;
+        currentParams = {};
+        path = '';
+        // First initialize all properties with undefined so they all exist (even if they're not filled, e.g. non-matched optional params)
+        for (const param of endpoint.params) {
+          currentParams[param.name] = void 0;
+        }
+      }
+
+      path = chars[i] + path;
       if (state.isDynamic) {
         const segment = state.segment;
         const name = segment.name;
-        if (params[name] === void 0) {
-          params[name] = chars[i];
+        if (currentParams[name] === void 0) {
+          currentParams[name] = chars[i];
         } else {
-          params[name] += chars[i];
+          currentParams[name] = chars[i] + currentParams[name];
         }
 
         // check for constraint if this state's segment is constrained
         // and the state is the last dynamic state in a series of dynamic states.
         // null fallback is used, as a star segment can also be a dynamic segment, but without a pattern.
         const checkConstraint = state.isConstrained
-          && !Object.is(states[i + 1]?.segment, segment);
+          && !Object.is(states[i - 1]?.segment, segment);
 
         if (!checkConstraint) continue;
 
-        this.satisfiesConstraints = this.satisfiesConstraints && state.satisfiesConstraint(params[name]!);
+        this.satisfiesConstraints = this.satisfiesConstraints && state.satisfiesConstraint(currentParams[name]!);
       }
     }
 
-    if(this.satisfiesConstraints) {
-      this.params = params;
+    if (currentEndpoint !== null && !Object.is(currentEndpoint.route.handler, routes[0]?.endpoint?.route.handler)) {
+      routes.unshift(new RecognizedRoute<T>(currentEndpoint, path, currentParams));
     }
-    return params;
+
+    if (routes.length > 1 && routes[0].path === '') routes.shift();
+
+    if (this.satisfiesConstraints) {
+      this.recognizedResult = result = [routes, this.head];
+    }
+    return result;
   }
 
   /**
@@ -342,7 +368,7 @@ class RecognizeResult<T> {
     return this.candidates.length === 0;
   }
 
-  public constructor(rootState: SeparatorState<T>) {
+  public constructor(rootState: AnyState<T>) {
     this.candidates = [new Candidate([''], [rootState], [], this)];
   }
 
@@ -365,7 +391,7 @@ class RecognizeResult<T> {
     this.candidates.splice(this.candidates.indexOf(candidate), 1);
   }
 
-  public advance(ch: string): void {
+  public advance(ch: string): void | true {
     const candidates = this.candidates.slice();
 
     for (const candidate of candidates) {
@@ -383,7 +409,7 @@ const routeParameterPattern = /^:(?<name>[^?\s{}]+)(?:\{\{(?<constraint>.+)\}\})
 
 export class RouteRecognizer<T> {
   private readonly rootState: SeparatorState<T> = new State(null, null, '') as SeparatorState<T>;
-  private readonly cache: Map<string, RecognizedRoute<T> | null> = new Map<string, RecognizedRoute<T> | null>();
+  private readonly cache: Map<string, [RecognizedRoute<T>[], AnyState<T>] | null> = new Map<string, [RecognizedRoute<T>[], AnyState<T>] | null>();
   private readonly endpointLookup: Map<string, Endpoint<T>> = new Map<string, Endpoint<T>>();
 
   public add(routeOrRoutes: IConfigurableRoute<T> | readonly IConfigurableRoute<T>[], addResidue: boolean = false): void {
@@ -413,7 +439,7 @@ export class RouteRecognizer<T> {
   private $add(route: IConfigurableRoute<T>, addResidue: boolean): Endpoint<T> {
     const path = route.path;
     const lookup = this.endpointLookup;
-    if(lookup.has(path)) throw createError(`Cannot add duplicate path '${path}'.`);
+    if (lookup.has(path)) throw createError(`Cannot add duplicate path '${path}'.`);
     const $route = new ConfigurableRoute(path, route.caseSensitive === true, route.handler);
 
     // Normalize leading, trailing and double slashes by ignoring empty segments
@@ -466,15 +492,51 @@ export class RouteRecognizer<T> {
     return endpoint;
   }
 
-  public recognize(path: string): RecognizedRoute<T> | null {
-    let result = this.cache.get(path);
-    if (result === void 0) {
-      this.cache.set(path, result = this.$recognize(path));
+  public recognize(path: string, relativeTo: RecognizedRoute<T>[] | null = null): RecognizedRoute<T>[] | null {
+    const cache = this.cache;
+    let result = cache.get(path);
+    if (result !== void 0) return result?.[0] ?? null;
+
+    if (relativeTo !== null) {
+      // check for cached result first
+      const parentPath = relativeTo.reduce((acc, curr) => acc.length ? `${acc}/${curr.path}` : curr.path, '');
+      const combinedPath = combinePaths(parentPath, path);
+
+      result = cache.get(combinedPath);
+      if (result !== void 0) return result === null ? null : result[0].slice(relativeTo.length);
+
+      // no cached result, try recognizing parent first
+      const parentResult = cache.get(parentPath);
+
+      if (parentResult === void 0 || parentResult?.[0] !== relativeTo) return null;
+
+      const relativeResult = this.$recognize(path, parentResult[1]);
+      if (relativeResult === null) return null;
+
+      let routes = relativeResult[0];
+      if (routes.length > 1 && routes[0].path === '') routes = routes.slice(1);
+      cache.set(combinedPath, [[...relativeTo, ...routes], relativeResult[1]]);
+
+      return routes;
     }
-    return result;
+
+    cache.set(path, result = this.$recognize(path, this.rootState));
+    return result?.[0] ?? null;
+
+    function combinePaths(parentPath: string, childPath: string): string {
+      if (parentPath === '') return childPath;
+      if (childPath === '') return parentPath;
+      if (parentPath.endsWith('/'))
+        return childPath.startsWith('/')
+          ? parentPath + childPath.slice(1)
+          : parentPath + childPath;
+      return childPath.startsWith('/')
+        ? parentPath + childPath
+        : `${parentPath}/${childPath}`;
+    }
   }
 
-  private $recognize(path: string): RecognizedRoute<T> | null {
+  private $recognize(path: string, relativeToState: AnyState<T>): [RecognizedRoute<T>[], AnyState<T>] | null {
     if (!path.startsWith('/')) {
       path = `/${path}`;
     }
@@ -483,7 +545,7 @@ export class RouteRecognizer<T> {
       path = path.slice(0, -1);
     }
 
-    const result = new RecognizeResult(this.rootState);
+    const result = new RecognizeResult(relativeToState);
     for (let i = 0, ii = path.length; i < ii; ++i) {
       const ch = path.charAt(i);
       result.advance(ch);
@@ -498,14 +560,11 @@ export class RouteRecognizer<T> {
       return null;
     }
 
-    const { endpoint } = candidate;
-    const params = candidate._getParams();
-
-    return new RecognizedRoute<T>(endpoint, params);
+    return candidate._getRoutes();
   }
 
   public getEndpoint(path: string): Endpoint<T> | null {
-    return this.endpointLookup.get(path) ??  null;
+    return this.endpointLookup.get(path) ?? null;
   }
 }
 
@@ -684,7 +743,7 @@ class StaticSegment<T> {
   public constructor(
     public readonly value: string,
     public readonly caseSensitive: boolean,
-  ) {}
+  ) { }
 
   public appendTo(state: AnyState<T>): StaticState<T> {
     const { value, value: { length } } = this;
@@ -759,7 +818,7 @@ class StarSegment<T> {
   public constructor(
     public readonly name: string,
     public readonly kind: SegmentKind.star | SegmentKind.residue,
-  ) {}
+  ) { }
 
   public appendTo(state: AnyState<T>): StarState<T> {
     state = state.append(
