@@ -5392,7 +5392,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('replace - inherited', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5434,7 +5436,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('replace - inherited - sibling', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5444,7 +5448,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeTwo.id2;
@@ -5491,7 +5497,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('invoke-lifecycles - inherited', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public loading() {
               this.id2 = ++CeOne.id2;
@@ -5535,7 +5543,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('invoke-lifecycles - inherited - sibling', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public loading() {
               this.id2 = ++CeOne.id2;
@@ -5544,7 +5554,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public loading() {
               this.id2 = ++CeTwo.id2;
@@ -5612,7 +5624,9 @@ describe('router/smoke-tests.spec.ts', function () {
           @route({ path: 'c1/:id', transitionPlan: 'replace' })
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public loading() {
               this.id2 = ++CeOne.id2;
@@ -5622,7 +5636,9 @@ describe('router/smoke-tests.spec.ts', function () {
           @route({ path: 'c2/:id', transitionPlan: 'invoke-lifecycles' })
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public loading() {
               this.id2 = ++CeTwo.id2;
@@ -5632,7 +5648,9 @@ describe('router/smoke-tests.spec.ts', function () {
           @route({ path: 'p1/:id', routes: [CeTwo], transitionPlan: 'replace' })
           @customElement({ name: 'p-one', template: 'p1 ${id1} ${id2} <au-viewport></au-viewport>' })
           class ParentOne {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++ParentOne.id1;
             private id2: number;
             public loading() {
               this.id2 = ++ParentOne.id2;
@@ -5642,7 +5660,9 @@ describe('router/smoke-tests.spec.ts', function () {
           @route({ path: 'p2/:id', routes: [CeOne], transitionPlan: 'invoke-lifecycles' })
           @customElement({ name: 'p-two', template: 'p2 ${id1} ${id2} <au-viewport></au-viewport>' })
           class ParentTwo {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++ParentTwo.id1;
             private id2: number;
             public loading() {
               this.id2 = ++ParentTwo.id2;
@@ -5692,7 +5712,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('transitionPlan function #1', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5735,7 +5757,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeTwo.id2;
@@ -5745,7 +5769,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5793,7 +5819,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeTwo.id2;
@@ -5812,7 +5840,9 @@ describe('router/smoke-tests.spec.ts', function () {
           })
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2} <au-viewport></au-viewport>' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5855,7 +5885,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeTwo.id2;
@@ -5874,7 +5906,9 @@ describe('router/smoke-tests.spec.ts', function () {
           })
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2} <au-viewport></au-viewport>' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -5917,7 +5951,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-two', template: 'ce2 ${id1} ${id2} ${id}' })
           class CeTwo implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeTwo.id1;
             private id2: number;
             private id: string;
             public canLoad(params: Params): boolean {
@@ -5929,7 +5965,9 @@ describe('router/smoke-tests.spec.ts', function () {
 
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2} ${id}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             private id: string;
             public canLoad(params: Params): boolean {
@@ -5938,7 +5976,6 @@ describe('router/smoke-tests.spec.ts', function () {
               return true;
             }
           }
-
           @route({
             transitionPlan: 'replace',
             routes: [
@@ -5992,7 +6029,9 @@ describe('router/smoke-tests.spec.ts', function () {
         it('replace - different paths for same component', async function () {
           @customElement({ name: 'ce-one', template: 'ce1 ${id1} ${id2}' })
           class CeOne implements IRouteViewModel {
+            private static id1: number = 0;
             private static id2: number = 0;
+            private readonly id1: number = ++CeOne.id1;
             private id2: number;
             public canLoad(): boolean {
               this.id2 = ++CeOne.id2;
@@ -6431,6 +6470,8 @@ describe('router/smoke-tests.spec.ts', function () {
         it('multiple configurations for the same component under the same parent', async function () {
           @customElement({ name: 'c-1', template: 'c1 ${id}' })
           class C1 implements IRouteViewModel {
+            private static id: number = 0;
+            private readonly id: number = ++C1.id;
             public data: Record<string, unknown>;
             public loading(_params: Params, next: RouteNode, _current: RouteNode): void | Promise<void> {
               this.data = next.data;
@@ -6624,7 +6665,9 @@ describe('router/smoke-tests.spec.ts', function () {
           @route({ path: 'c1/:id', transitionPlan: 'replace' })
           @customElement({ name: 'c-1', template: '${parent}/c1 - ${routeId} - ${instanceId} - ${activationId}' })
           class C1 {
+            private static instanceId: number = 0;
             private static activationId: number = 0;
+            private readonly instanceId: number = ++C1.instanceId;
             private activationId: number = 0;
             private readonly parent: string;
             private routeId: string;
