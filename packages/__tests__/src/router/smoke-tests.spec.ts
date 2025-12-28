@@ -4067,6 +4067,7 @@ describe('router/smoke-tests.spec.ts', function () {
           // Start
           await tasksSettled();
           type NavBar = InstanceType<typeof navBarCe>;
+          assert.html.textContent(host, 'P1P2 root C11C12 p1 c11', 'start content');
           const rootNavbar = CustomElement.for<NavBar>(host.querySelector('nav-bar')).viewModel;
           rootNavbar.assert([{ href: 'p1', text: 'P1', active: true }, { href: 'p2', text: 'P2', active: false }], 'start root');
           let childNavBar = CustomElement.for<NavBar>(host.querySelector('ce-p1>nav-bar')).viewModel;
@@ -4075,6 +4076,7 @@ describe('router/smoke-tests.spec.ts', function () {
           // Round#1
           await router.load('p2');
           await tasksSettled();
+          assert.html.textContent(host, 'P1P2 root C21C22 p2 c22', 'round#1 content');
           rootNavbar.assert([{ href: 'p1', text: 'P1', active: false }, { href: 'p2', text: 'P2', active: true }], 'round#1 root');
           childNavBar = CustomElement.for<NavBar>(host.querySelector('ce-p2>nav-bar')).viewModel;
           childNavBar.assert([{ href: 'c21', text: 'C21', active: false }, { href: 'c22', text: 'C22', active: true }], 'round#1 child navbar');
@@ -4082,6 +4084,7 @@ describe('router/smoke-tests.spec.ts', function () {
           // Round#2
           await router.load('p1/c12');
           await tasksSettled();
+          assert.html.textContent(host, 'P1P2 root C11C12 p1 c12', 'round#2 content');
           rootNavbar.assert([{ href: 'p1', text: 'P1', active: true }, { href: 'p2', text: 'P2', active: false }], 'round#2 root');
           childNavBar = CustomElement.for<NavBar>(host.querySelector('ce-p1>nav-bar')).viewModel;
           childNavBar.assert([{ href: 'c11', text: 'C11', active: false }, { href: 'c12', text: 'C12', active: true }], 'round#2 navbar');
@@ -4089,6 +4092,7 @@ describe('router/smoke-tests.spec.ts', function () {
           // Round#3
           await router.load('p2/c21');
           await tasksSettled();
+          assert.html.textContent(host, 'P1P2 root C21C22 p2 c21', 'round#3 content');
           rootNavbar.assert([{ href: 'p1', text: 'P1', active: false }, { href: 'p2', text: 'P2', active: true }], 'round#3 root');
           childNavBar = CustomElement.for<NavBar>(host.querySelector('ce-p2>nav-bar')).viewModel;
           childNavBar.assert([{ href: 'c21', text: 'C21', active: true }, { href: 'c22', text: 'C22', active: false }], 'round#3 navbar');
@@ -4096,6 +4100,7 @@ describe('router/smoke-tests.spec.ts', function () {
           // Round#4 - nav:false, but routeable
           await router.load('p3');
           await tasksSettled();
+          assert.html.textContent(host, 'P1P2 root p3', 'round#4 content');
           rootNavbar.assert([{ href: 'p1', text: 'P1', active: false }, { href: 'p2', text: 'P2', active: false }], 'round#4 root');
           assert.notEqual(host.querySelector('ce-p3'), null);
 
