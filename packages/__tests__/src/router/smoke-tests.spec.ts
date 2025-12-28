@@ -1392,6 +1392,10 @@ describe('router/smoke-tests.spec.ts', function () {
 
       it('function as fallback is supported - viewport - hierarchical', async function () {
 
+        function fallback(vi: IViewportInstruction, rn: RouteNode, _ctx: IRouteContext): string {
+          return rn.component.Type === P1 ? 'n-f-1' : 'n-f-2';
+        }
+
         @customElement({ name: 'ce-c1', template: 'c1' })
         class C1 { }
 
@@ -1405,6 +1409,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p1', template: 'p1<au-viewport fallback.bind></au-viewport>' })
         class P1 {
+          private readonly fallback = fallback;
         }
 
         @route({
@@ -1414,6 +1419,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p2', template: 'p2<au-viewport fallback.bind></au-viewport>' })
         class P2 {
+          private readonly fallback = fallback;
         }
 
         @customElement({ name: 'n-f-1', template: 'nf1' })
