@@ -1635,7 +1635,7 @@ describe('router/smoke-tests.spec.ts', function () {
             { id: 'r3', path: ['nf1'], component: NF1 },
             { id: 'r4', path: ['nf2'], component: NF2 },
           ],
-          fallback(rn: RouteNode, _ctx: IRouteContext): Routeable {
+          fallback(_vi: ViewportInstruction, rn: RouteNode, _ctx: IRouteContext): Routeable {
             return rn.component.Type === P1 ? NF1 : NF2;
           },
         })
@@ -1823,7 +1823,7 @@ describe('router/smoke-tests.spec.ts', function () {
             { id: 'r3', path: ['nf1'], component: NF1 },
             { id: 'r4', path: ['nf2'], component: NF2 },
           ],
-          fallback(rn: RouteNode, _ctx: IRouteContext): Routeable {
+          fallback(_vi: ViewportInstruction, rn: RouteNode, _ctx: IRouteContext): Routeable {
             return Promise.resolve(rn.component.Type === P1 ? NF1 : NF2);
           },
         })
@@ -1896,6 +1896,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p1', template: 'p1<au-viewport fallback.bind></au-viewport>' })
         class P1 {
+          private readonly fallback = NF1;
         }
 
         @route({
@@ -1905,6 +1906,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p2', template: 'p2<au-viewport fallback.bind></au-viewport>' })
         class P2 {
+          private readonly fallback = NF2;
         }
 
         @customElement({ name: 'n-f-1', template: 'nf1' })
@@ -2095,6 +2097,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p1', template: 'p1<au-viewport fallback.bind></au-viewport>' })
         class P1 {
+          private readonly fallback = Promise.resolve(NF1);
         }
 
         @route({
@@ -2104,6 +2107,7 @@ describe('router/smoke-tests.spec.ts', function () {
         })
         @customElement({ name: 'ce-p2', template: 'p2<au-viewport fallback.bind></au-viewport>' })
         class P2 {
+          private readonly fallback = Promise.resolve(NF2);
         }
 
         @customElement({ name: 'n-f-1', template: 'nf1' })
@@ -3996,7 +4000,7 @@ describe('router/smoke-tests.spec.ts', function () {
           await au.stop(true);
         });
 
-        it('route deco- async components', async function () {
+        it('route deco - async components', async function () {
           @customElement({ name: 'ce-c11', template: 'c11' })
           class C11 { }
           @customElement({ name: 'ce-c12', template: 'c12' })
