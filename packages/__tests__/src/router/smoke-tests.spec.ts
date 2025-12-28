@@ -1,7 +1,7 @@
 import { LogLevel, Constructable, kebabCase, ILogConfig, Registration, noop, IModule, inject, resolve, isArray } from '@aurelia/kernel';
 import { assert, MockBrowserHistoryLocation, TestContext } from '@aurelia/testing';
 import { tasksSettled } from '@aurelia/runtime';
-import { RouterConfiguration, IRouter, NavigationInstruction, IRouteContext, RouteNode, Params, route, INavigationModel, IRouterOptions, IRouteViewModel, IRouteConfig, Router, HistoryStrategy, IRouterEvents, ITypedNavigationInstruction_string, IViewportInstruction, RouteConfig, Routeable, RouterOptions, RouteContext } from '@aurelia/router';
+import { RouterConfiguration, IRouter, NavigationInstruction, IRouteContext, RouteNode, Params, route, INavigationModel, IRouterOptions, IRouteViewModel, IRouteConfig, Router, HistoryStrategy, IRouterEvents, ITypedNavigationInstruction_string, IViewportInstruction, RouteConfig, Routeable, RouterOptions, RouteContext, ViewportInstruction } from '@aurelia/router';
 import { Aurelia, valueConverter, customElement, CustomElement, ICustomElementViewModel, IHistory, IHydratedController, ILocation, INode, IPlatform, IWindow, watch } from '@aurelia/runtime-html';
 
 import { getLocationChangeHandlerRegistration, TestRouterConfiguration } from './_shared/configuration.js';
@@ -1289,7 +1289,7 @@ describe('router/smoke-tests.spec.ts', function () {
             { id: 'r3', path: ['nf1'], component: NF1 },
             { id: 'r4', path: ['nf2'], component: NF2 },
           ],
-          fallback(rn: RouteNode, _ctx: IRouteContext): string {
+          fallback(_vi: ViewportInstruction, rn: RouteNode, _ctx: IRouteContext): string {
             return rn.component.Type === P1 ? 'n-f-1' : 'n-f-2';
           },
         })
@@ -1319,15 +1319,15 @@ describe('router/smoke-tests.spec.ts', function () {
 
         await au.start();
 
-        assertComponentsVisible(host, [Root, [P1, [C1]]]);
+        assertComponentsVisible(host, [Root, [P1, [C1]]], 'round #1');
 
         await router.load('p2/foo');
 
-        assertComponentsVisible(host, [Root, [P2, [NF2]]]);
+        assertComponentsVisible(host, [Root, [P2, [NF2]]], 'round #2');
 
         await router.load('p1/foo');
 
-        assertComponentsVisible(host, [Root, [P1, [NF1]]]);
+        assertComponentsVisible(host, [Root, [P1, [NF1]]], 'round #3');
 
         await au.stop(true);
         assert.areTaskQueuesEmpty();
