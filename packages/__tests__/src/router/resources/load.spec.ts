@@ -69,6 +69,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'fo-o', template: '${instanceId} ${id}' })
         class Foo {
           private static instanceId: number = 0;
+          private readonly instanceId = ++Foo.instanceId;
           private id: string;
           public loading(params: Params) {
             this.id = params.id;
@@ -361,7 +362,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'pro-ducts', template: `<a load="route:product/1; context.bind:rtCtx.parent"></a><a load="route:product; params.bind:{id: 2}; context.bind:rtCtx.parent"></a> products` })
         class Products {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -504,7 +505,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-21', template: `l21 <a load="route:l12; context.bind:rtCtx.parent.parent"></a>` })
         class L21 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -512,7 +513,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-22', template: `l22 <a load="route:l11; context.bind:rtCtx.parent.parent"></a>` })
         class L22 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -562,7 +563,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-21', template: `l21 <a load="route:l22; context.bind:rtCtx.parent"></a>` })
         class L21 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -570,7 +571,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-22', template: `l22 <a load="route:l12; context.bind:null"></a>` })
         class L22 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -578,7 +579,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-23', template: `l23 <a load="route:l24; context.bind:rtCtx.parent"></a>` })
         class L23 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
@@ -586,7 +587,7 @@ describe('router/resources/load.spec.ts', function () {
         @customElement({ name: 'l-24', template: `l24 <a load="route:l11; context.bind:null"></a>` })
         class L24 {
           private rtCtx: IRouteContext;
-          public canLoad(next: RouteNode, _current: RouteNode): boolean {
+          public canLoad(_params: Params, next: RouteNode, _current: RouteNode): boolean {
             this.rtCtx = next.context;
             return true;
           }
