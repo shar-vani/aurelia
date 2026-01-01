@@ -1,3 +1,5 @@
+import type { Writable } from '@aurelia/kernel';
+
 export interface IConfigurableRoute<T> {
   readonly path: string;
   readonly caseSensitive?: boolean;
@@ -64,6 +66,19 @@ export class RecognizedRoute<T> {
     path = path.startsWith('/') ? path.slice(1) : path;
     path = path.endsWith('/') ? path.slice(0, -1) : path;
     this.path = path;
+  }
+
+  /** @internal */
+  public _importFrom(route: RecognizedRoute<T>): void {
+    const params: Record<string, string | undefined> = Object.create(null);
+    for (const key in route.params) {
+      params[key] = route.params[key];
+    }
+    for (const key in this.params) {
+      params[key] = this.params[key];
+    }
+
+    (this as Writable<RecognizedRoute<T>>).params = Object.freeze(params);
   }
 }
 
@@ -211,14 +226,15 @@ class Candidate<T> {
         }
       }
 
-      path = chars[i] + path;
+      const char = chars[i];
+      path = char + path;
       if (state.isDynamic) {
         const segment = state.segment;
         const name = segment.name;
         if (currentParams[name] === void 0) {
-          currentParams[name] = chars[i];
+          currentParams[name] = char;
         } else {
-          currentParams[name] = chars[i] + currentParams[name];
+          currentParams[name] = char + currentParams[name];
         }
 
         // check for constraint if this state's segment is constrained
@@ -238,6 +254,16 @@ class Candidate<T> {
     }
 
     if (routes.length > 1 && routes[0].path === '') routes.shift();
+
+    // if the last route has only $$residue parameter, then remove it and add the residue to the previous route.
+    const lastRoute = routes[routes.length - 1];
+    if (lastRoute != null && lastRoute.endpoint.params.length === 1 && lastRoute.endpoint.params[0].name === RESIDUE) {
+      const residue = lastRoute.params[RESIDUE];
+      if (residue != null && residue.length > 0 && routes.length > 1) {
+        const [previousRoute] = routes.splice(routes.length - 2, 1);
+        lastRoute._importFrom(previousRoute);
+      }
+    }
 
     if (this.satisfiesConstraints) {
       this.recognizedResult = result = [routes, this.head];

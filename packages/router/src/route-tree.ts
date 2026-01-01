@@ -502,9 +502,7 @@ export function createAndAppendNodes(
           (rr as Writable<$RecognizedRoute>).residue = null;
 
           // need to find a way to avoid this complication
-          (vi.component as Writable<ITypedNavigationInstruction_string>).value = options.useEagerLoading
-            ? rr.route.path
-            : noResidue
+          (vi.component as Writable<ITypedNavigationInstruction_string>).value = noResidue
               ? path
               : path.slice(0, -(residue.length + 1));
 
