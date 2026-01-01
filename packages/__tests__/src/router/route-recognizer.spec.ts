@@ -3019,9 +3019,9 @@ describe('router/route-recognizer.spec.ts', function () {
       recognizer.add({ path: 'ps/:id?', handler: parentWithOptionalParamSinglePath }, true);
 
       const child = Symbol.for('au:rr:child');
-      recognizer.add({ path: 'pm/child/:id', handler: child }, true);
-      recognizer.add({ path: 'pm/:id/child/:id', handler: child }, true);
-      recognizer.add({ path: 'ps/:id?/child/:id', handler: child }, true);
+      recognizer.add({ path: 'child/:id', handler: child }, true, 'pm');
+      recognizer.add({ path: 'child/:id', handler: child }, true, 'pm/:id');
+      recognizer.add({ path: 'child/:id', handler: child }, true, 'ps/:id?');
 
       let parentPath1: RecognizedRoute<any>[];
       let parentPath2: RecognizedRoute<any>[];
@@ -3042,7 +3042,7 @@ describe('router/route-recognizer.spec.ts', function () {
       assert.strictEqual(results?.length, 2, 'round#3.1 - length');
       assert.equal(results?.[0].endpoint.route.handler, parentWithOptionalParamMultPaths, 'round#3.1 - handler#1');
       assert.equal(results?.[0].path, 'pm', 'round#3.1 - path#1');
-      assert.deepEqual(results?.[0].params, { id: undefined }, 'round#3.1 - params#1');
+      assert.deepEqual(results?.[0].params, { }, 'round#3.1 - params#1');
       assert.equal(results?.[1].endpoint.route.handler, child, 'round#3.1 - handler#2');
       assert.equal(results?.[1].path, 'child/99', 'round#3.1 - path#2');
       assert.deepEqual(results?.[1].params, { id: '99' }, 'round#3.1 - params#2');

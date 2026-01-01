@@ -444,23 +444,23 @@ export class RouteRecognizer<T> {
   private readonly cache: Map<string, [RecognizedRoute<T>[], AnyState<T>] | null> = new Map<string, [RecognizedRoute<T>[], AnyState<T>] | null>();
   private readonly endpointLookup: Map<string, Endpoint<T>> = new Map<string, Endpoint<T>>();
 
-  public add(routeOrRoutes: IConfigurableRoute<T> | readonly IConfigurableRoute<T>[], addResidue: boolean = false): void {
+  public add(routeOrRoutes: IConfigurableRoute<T> | readonly IConfigurableRoute<T>[], addResidue: boolean = false, parentPath: string | null = null): void {
     let params: readonly Parameter[];
     let endpoint: Endpoint<T>;
     if (routeOrRoutes instanceof Array) {
       for (const route of routeOrRoutes) {
-        endpoint = this.$add(route, false);
+        endpoint = this.$add(route, false, parentPath);
         params = endpoint.params;
         // add residue iff the last parameter is not a star segment.
         if (!addResidue || (params[params.length - 1]?.isStar ?? false)) continue;
-        endpoint.residualEndpoint = this.$add({ ...route, path: `${route.path}/*${RESIDUE}` }, true);
+        endpoint.residualEndpoint = this.$add({ ...route, path: `${route.path}/*${RESIDUE}` }, true, parentPath);
       }
     } else {
-      endpoint = this.$add(routeOrRoutes, false);
+      endpoint = this.$add(routeOrRoutes, false, parentPath);
       params = endpoint.params;
       // add residue iff the last parameter is not a star segment.
       if (addResidue && !(params[params.length - 1]?.isStar ?? false)) {
-        endpoint.residualEndpoint = this.$add({ ...routeOrRoutes, path: `${routeOrRoutes.path}/*${RESIDUE}` }, true);
+        endpoint.residualEndpoint = this.$add({ ...routeOrRoutes, path: `${routeOrRoutes.path}/*${RESIDUE}` }, true, parentPath);
       }
     }
 
@@ -468,11 +468,11 @@ export class RouteRecognizer<T> {
     this.cache.clear();
   }
 
-  private $add(route: IConfigurableRoute<T>, addResidue: boolean): Endpoint<T> {
-    const path = route.path;
+  private $add(route: IConfigurableRoute<T>, addResidue: boolean, parentPath: string | null): Endpoint<T> {
+    const path = parentPath === null ? route.path : `${parentPath}/${route.path}`;
     const lookup = this.endpointLookup;
     if (lookup.has(path)) throw createError(`Cannot add duplicate path '${path}'.`);
-    const $route = new ConfigurableRoute(path, route.caseSensitive === true, route.handler);
+    const $route = new ConfigurableRoute(route.path, route.caseSensitive === true, route.handler);
 
     // Normalize leading, trailing and double slashes by ignoring empty segments
     const parts = path === '' ? [''] : path.split('/').filter(isNotEmpty);
