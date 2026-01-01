@@ -71,13 +71,12 @@ export class RecognizedRoute<T> {
   /** @internal */
   public _importFrom(route: RecognizedRoute<T>): void {
     const params: Record<string, string | undefined> = Object.create(null);
-    for (const key in route.params) {
-      params[key] = route.params[key];
-    }
     for (const key in this.params) {
       params[key] = this.params[key];
     }
-
+    for (const key in route.params) {
+      params[key] = route.params[key];
+    }
     (this as Writable<RecognizedRoute<T>>).params = Object.freeze(params);
   }
 }
@@ -203,7 +202,7 @@ class Candidate<T> {
   public _getRoutes(): [RecognizedRoute<T>[], AnyState<T>] | null {
     let result = this.recognizedResult;
     if (result != null) return result;
-    const { states, chars, endpoint } = this;
+    const { states, chars } = this;
 
     this.satisfiesConstraints = true;
     const routes = [];
@@ -213,15 +212,22 @@ class Candidate<T> {
     let currentParams: Record<string, string | undefined> = {};
     for (let i = states.length - 1, ii = 0; i >= ii; --i) {
       const state = states[i];
-      if (state.endpoint !== null && !Object.is(state.endpoint.route.handler, currentEndpoint?.route.handler)) {
+      // should create the parent route if
+      // - the state has an endpoint, and
+      // - the endpoint handler is different from the current endpoint handler, and
+      // - if the state is a static segment, it is not a prefix of the current endpoint's route path
+      const createNewRoute = state.endpoint !== null
+        && !Object.is(state.endpoint.route.handler, currentEndpoint?.route.handler)
+        && !(state.segment != null && state.segment.kind === SegmentKind.static && currentEndpoint?.route.path.startsWith(state.segment.value));
+      if (createNewRoute) {
         if (currentEndpoint !== null) {
           routes.unshift(new RecognizedRoute<T>(currentEndpoint, path, currentParams));
         }
-        currentEndpoint = state.endpoint;
+        currentEndpoint = state.endpoint!;
         currentParams = {};
         path = '';
         // First initialize all properties with undefined so they all exist (even if they're not filled, e.g. non-matched optional params)
-        for (const param of endpoint.params) {
+        for (const param of currentEndpoint.params) {
           currentParams[param.name] = void 0;
         }
       }
