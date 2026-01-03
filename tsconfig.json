@@ -1,9 +1,18 @@
 {
   "compilerOptions": {
+    "module": "esnext",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "target": "ES2017",
     "esModuleInterop": true,
-    "module": "commonjs",
-    "target": "es2021",
-    "lib": ["esnext"],
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+    "importHelpers": true,
+    "sourceMap": true
+  },
+  "include": [
+    "src"
+  ],
+  "files": [
+    "src/resource.d.ts"
+  ]
 }

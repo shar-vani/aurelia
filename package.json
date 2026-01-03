@@ -1,221 +1,45 @@
 {
-  "name": "@aurelia/monorepo",
-  "private": true,
-  "version": "2.0.0-beta.26",
-  "packageManager": "npm@10.9.0",
-  "workspaces": [
-    "packages/kernel",
-    "packages/metadata",
-    "packages/platform",
-    "packages/platform-browser",
-    "packages/expression-parser",
-    "packages/template-compiler",
-    "packages/runtime",
-    "packages/runtime-html",
-    "packages/dialog",
-    "packages/compat-v1",
-    "packages/fetch-client",
-    "packages/i18n",
-    "packages/validation",
-    "packages/validation-html",
-    "packages/validation-i18n",
-    "packages/state",
-    "packages/store-v1",
-    "packages/ui-virtualization",
-    "packages/web-components",
-    "packages/route-recognizer",
-    "packages/router",
-    "packages/router-direct",
-    "packages/testing",
-    "packages/addons",
-    "packages/aurelia",
-    "packages/__tests__",
-    "packages-tooling/plugin-gulp",
-    "packages-tooling/plugin-conventions",
-    "packages-tooling/vite-plugin",
-    "packages-tooling/webpack-loader",
-    "packages-tooling/babel-jest",
-    "packages-tooling/ts-jest",
-    "packages-tooling/parcel-transformer",
-    "packages-tooling/__tests__",
-    "packages/__e2e__/1-gh-issues",
-    "packages/__e2e__/2-hmr-vite",
-    "packages/__e2e__/3-hmr-webpack",
-    "packages/__e2e__/4-i18n",
-    "packages/__e2e__/5-router-direct",
-    "packages/__e2e__/6-router",
-    "packages/__e2e__/7-select-safari16",
-    "packages/__e2e__/8-ui-virtualization",
-    "packages/__e2e__/9-vite-wo-convention",
-    "packages/__e2e__/10-router-none-history-with-hash",
-    "packages/__e2e__/11-validation",
-    "packages/__e2e__/12-type-check",
-    "packages/__e2e__/13-hmr-convention-routing-memory-leak",
-    "benchmarks",
-    "examples/1kcomponents",
-    "examples/doc-example",
-    "examples/fractals-tree",
-    "examples/navigation-skeleton",
-    "examples/rainbow-spiral",
-    "examples/realworld",
-    "examples/realworld-advanced",
-    "examples/router-direct-animation",
-    "examples/router-direct-hooks",
-    "examples/state-plugin",
-    "examples/sierpinski-triangle"
-  ],
-  "license": "MIT",
-  "engines": {
-    "node": ">=22.12.0 <23",
-    "npm": ">=10.0.0 <11"
+  "name": "my-app",
+  "description": "An Aurelia 2 client application.",
+  "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "???"
   },
-  "scripts": {
-    "prepare": "husky install",
-    "commit": "git-cz",
-    "init": "npm ci && npm run build",
-    "rebuild": "npm run clean && npm run build",
-    "build": "turbo build --filter=@aurelia/* --filter=aurelia --filter=!@aurelia/benchmarks",
-    "build:release": "cross-env RELEASE_BUILD=true turbo rollup --continue --filter=aurelia --filter=@aurelia/* --filter=!@aurelia/benchmarks",
-    "postbuild:release": "npm run clean:tsconfig-build-cache",
-    "changeset": "changeset",
-    "changeset:version": "changeset version",
-    "postchangeset:version": "git tag -a v$(node -p \"require('package.json').version\") -m \"v$(node -p \"require('package.json').version\")\"",
-    "changeset:publish": "changeset publish --no-git-tag",
-    "changeset:pre:enter": "changeset pre enter dev",
-    "changeset:pre:exit": "changeset pre exit",
-    "clean": "rimraf --glob dist packages/*/dist packages-tooling/*/dist test/*/dist examples/*/dist",
-    "clean:tsconfig-build-cache": "rimraf --glob packages/*/dist/tsconfig.tsbuildinfo packages-tooling/*/dist/tsconfig.tsbuildinfo",
-    "clean:lint": "rimraf --glob .eslintcache packages/*/.eslintcache packages-tooling/*/.eslintcache",
-    "lint": "turbo lint && npm run lint:other",
-    "lint:ci": "npm run lint:ci -ws --if-present",
-    "lint:other": "eslint --cache --ext .js,.ts scripts",
-    "lint:other:ci": "eslint --cache --ext .js,.ts --quiet --report-unused-disable-directives scripts",
-    "generate-native-modules": "ts-node -P tsconfig.json scripts/generate-native-modules.ts",
-    "publish:dev": "ts-node scripts/publish.ts dev --esm",
-    "publish:latest": "npx ts-node scripts/publish.ts latest --esm",
-    "bump-version:dev": "npx ts-node -P tsconfig.json scripts/bump-version.ts dev",
-    "bump-version:latest": "ts-node -P tsconfig.json scripts/bump-version.ts latest",
-    "check-dependencies": "ts-node -P tsconfig.json scripts/check-dependencies.ts",
-    "pregenerate-tests:template-compiler.static": "tsc --resolveJsonModule --module commonjs --moduleResolution node --outDir scripts/dist scripts/generate-tests/template-compiler.static.ts",
-    "generate-tests:template-compiler.static": "node scripts/dist/scripts/generate-tests/template-compiler.static.js",
-    "generate-tests:template-compiler.mutations": "ts-node -P tsconfig.json scripts/generate-tests/template-compiler.mutations.ts",
-    "test": "cd packages/__tests__ && npm run test",
-    "test:ci": "npm ci && npm run test",
-    "test:watch": "cd packages/__tests__ && npm run test-chrome:watch",
-    "test:debugger": "cd packages/__tests__ && npm run test-chrome:debugger",
-    "dev": "ts-node scripts/dev.ts",
-    "dev:tooling": "ts-node scripts/dev-tooling.ts"
+  "license": "UNLICENSED",
+  "dependencies": {
+    "aurelia": "latest",
+    "@aurelia/router": "latest"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.1",
-    "@changesets/cli": "^2.29.7",
-    "@commitlint/cli": "19.6.1",
-    "@rollup/plugin-alias": "5.1.1",
-    "@rollup/plugin-node-resolve": "16.0.0",
-    "@rollup/plugin-replace": "6.0.2",
-    "@rollup/plugin-terser": "0.4.4",
-    "@rollup/plugin-typescript": "12.1.2",
-    "@types/fancy-log": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "6.10.0",
-    "@typescript-eslint/parser": "6.10.0",
-    "chalk": "4.1.2",
-    "codecov": "^3.8.3",
-    "concurrently": "9.1.2",
-    "cross-env": "7.0.3",
-    "esbuild": "0.24.2",
-    "eslint": "8.53.0",
-    "eslint-plugin-import": "2.29.0",
-    "eslint-plugin-jsdoc": "46.9.0",
-    "eslint-plugin-mocha": "10.2.0",
-    "fancy-log": "2.0.0",
-    "http-server": "14.1.1",
-    "husky": "9.1.7",
-    "i18next": ">= 24.2.0",
-    "rimraf": "6.0.1",
-    "rollup": "4.29.1",
-    "rollup-plugin-esbuild": "6.1.1",
-    "tachometer": "0.7.1",
-    "ts-node": "10.9.2",
-    "turbo": "2.3.3",
-    "typescript": "5.7.2",
-    "v8-to-istanbul": "9.3.0",
-    "vite": "^7.0.2"
+    "eslint": "^9.17.0",
+    "globals": "^15.14.0",
+    "@aurelia/testing": "latest",
+    "stylelint": "^16.12.0",
+    "stylelint-config-standard": "^36.0.1",
+    "@aurelia/vite-plugin": "latest",
+    "vite": "^6.0.3",
+    "vite-plugin-node-polyfills": "^0.22.0",
+    "vitest": "^2.1.8",
+    "jsdom": "^25.0.1",
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "tslib": "^2.8.1",
+    "typescript-eslint": "^8.18.1"
   },
+  "scripts": {
+    "lint:js": "eslint src test",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "lint": "npm run lint:js && npm run lint:css",
+    "pretest": "npm run lint",
+    "start": "vite",
+    "build": "vite build",
+    "test": "vitest"
+  },
+  "type": "module",
   "overrides": {
-    "yargs": "17.7.2",
-    "braces": "3.0.3",
-    "ws": "8.18.0",
-    "lmdb": "3.1.6"
-  },
-  "commitlint": {
-    "rules": {
-      "body-leading-blank": [
-        1,
-        "always"
-      ],
-      "footer-leading-blank": [
-        1,
-        "always"
-      ],
-      "header-max-length": [
-        2,
-        "always",
-        100
-      ],
-      "scope-case": [
-        2,
-        "always",
-        "lower-case"
-      ],
-      "subject-case": [
-        2,
-        "never",
-        [
-          "sentence-case",
-          "start-case",
-          "pascal-case",
-          "upper-case"
-        ]
-      ],
-      "subject-empty": [
-        2,
-        "never"
-      ],
-      "subject-full-stop": [
-        2,
-        "never",
-        "."
-      ],
-      "type-case": [
-        2,
-        "always",
-        "lower-case"
-      ],
-      "type-empty": [
-        2,
-        "never"
-      ],
-      "type-enum": [
-        2,
-        "always",
-        [
-          "build",
-          "chore",
-          "ci",
-          "docs",
-          "feat",
-          "fix",
-          "perf",
-          "refactor",
-          "revert",
-          "style",
-          "test"
-        ]
-      ]
+    "vite-plugin-node-polyfills": {
+      "vite": "^6.0.0"
     }
-  },
-  "volta": {
-    "node": "22.12.0",
-    "npm": "10.9.0"
   }
 }
