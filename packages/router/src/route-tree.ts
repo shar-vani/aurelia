@@ -440,7 +440,7 @@ export function createAndAppendNodes(
 
           let childrenRoutes: $RecognizedRoute[];
           // eslint-disable-next-line prefer-const
-          ([rr, ...childrenRoutes] = ctx.routeConfigContext.recognize(path, false, node.instruction?.recognizedRoute?.route.path ?? null) ?? ([null] as unknown as $RecognizedRoute[]));
+          ([rr, ...childrenRoutes] = ctx.routeConfigContext.recognize(path, false, node.instruction?.recognizedRoute ?? null) ?? ([null] as unknown as $RecognizedRoute[]));
           log.trace('createNode recognized route: %s', rr);
           const residue = rr?.residue ?? null;
           log.trace('createNode residue:', residue);

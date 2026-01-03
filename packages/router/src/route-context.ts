@@ -1078,14 +1078,12 @@ export class RouteConfigContext {
     }
   }
 
-  public recognize(path: string, searchAncestor: boolean = false, parentPath: string | null = null): $RecognizedRoute[] | null {
+  public recognize(path: string, searchAncestor: boolean = false, parentRoute: $RecognizedRoute | null = null): $RecognizedRoute[] | null {
     if (__DEV__) trace(this._logger, Events.rcRecognizePath, path);
 
-    let parentPathAppended = false;
-    if (parentPath !== null && parentPath.length !== 0 && this._options.useEagerLoading) {
-      path = `${parentPath}/${path}`;
-      parentPathAppended = true;
-    }
+    let parentPath = this._options.useEagerLoading ? parentRoute?.pathFromRoot ?? '' : '';
+    if (parentPath.length !== 0) path = `${parentPath}/${path}`;
+
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let _current: IRouteConfigContext = this;
     let _continue = true;
@@ -1100,27 +1098,28 @@ export class RouteConfigContext {
       }
     }
 
+    const parentPathOrig = parentPath;
     // if parent path was appened, we need to remove those parts from the results.
     // future optimization opportunity.
-    if (parentPathAppended) {
-      while (parentPath!.length > 0) {
-        const result = results![0];
-        const consumedPath = result.path;
-        if (parentPath!.startsWith(consumedPath)) {
-          parentPath = parentPath!.slice(consumedPath.length);
-          if (parentPath.startsWith('/')) {
-            parentPath = parentPath.slice(1);
-          }
-          results?.splice(0, 1);
+    results = [...results!];
+    while (parentPath.length > 0) {
+      const result = results[0];
+      const consumedPath = result.path;
+      if (parentPath.startsWith(consumedPath)) {
+        parentPath = parentPath.slice(consumedPath.length);
+        if (parentPath.startsWith('/')) {
+          parentPath = parentPath.slice(1);
         }
+        results?.splice(0, 1);
       }
     }
 
-    return results!.map(result => new $RecognizedRoute(
+    return results.map(result => new $RecognizedRoute(
       result,
       Reflect.has(result.params, RESIDUE)
         ? (result.params[RESIDUE] ?? null)
-        : null
+        : null,
+      parentPathOrig
     ));
   }
 
@@ -1167,10 +1166,14 @@ export class RouteConfigContext {
 }
 
 export class $RecognizedRoute {
+  public readonly pathFromRoot: string;
   public constructor(
     public readonly route: RecognizedRoute<RouteConfig | Promise<RouteConfig>>,
     public readonly residue: string | null,
-  ) { }
+    parentPathFromRoot: string = '',
+  ) {
+    this.pathFromRoot = parentPathFromRoot.length === 0 ? this.route.path : `${parentPathFromRoot}/${this.route.path}`;
+  }
 
   public toString(): string {
     if (!__DEV__) return 'RR';
