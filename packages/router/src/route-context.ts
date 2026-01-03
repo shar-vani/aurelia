@@ -712,7 +712,7 @@ export class RouteConfigContext {
       parentPaths = current.config.path.flatMap(p => parentPaths.map(pp => pp.length === 0 ? p : `${p}/${pp}`));
       current = current.parent;
     }
-    return this._parentPaths = parentPaths;
+    return this._parentPaths = parentPaths.filter(p => p.length > 0);
   }
 
   private constructor(
