@@ -1,4 +1,4 @@
-import { IRouteContext, IRouteViewModel, Params, route, RouteNode } from '@aurelia/router';
+import { IRouteContext, IRouter, IRouteViewModel, Params, route, RouteNode } from '@aurelia/router';
 import { customElement } from '@aurelia/runtime-html';
 import { assert } from '@aurelia/testing';
 import { start as $start, RouterTestStartOptions } from '../_shared/create-fixture.js';
@@ -11,6 +11,7 @@ describe('router/resources/href.spec.ts', function () {
       async function start<TAppRoot>(options: RouterTestStartOptions<TAppRoot>) {
         return $start({ ...options, useEagerLoading });
       }
+      function getEmptyPath(): string[] { return useEagerLoading ? [] : ['']; }
 
       it('allow navigating to route defined in parent context using ../ prefix', async function () {
         @customElement({ name: 'pro-duct', template: `product \${id} <a href="../products"></a>` })
@@ -73,7 +74,7 @@ describe('router/resources/href.spec.ts', function () {
 
         @route({
           routes: [
-            { id: 'l21', path: ['', 'l21'], component: L21 },
+            { id: 'l21', path: [...getEmptyPath(), 'l21'], component: L21 },
           ]
         })
         @customElement({ name: 'l-11', template: `l11 <au-viewport></au-viewport>` })
@@ -81,7 +82,7 @@ describe('router/resources/href.spec.ts', function () {
 
         @route({
           routes: [
-            { id: 'l22', path: ['', 'l22'], component: L22 },
+            { id: 'l22', path: [...getEmptyPath(), 'l22'], component: L22 },
           ]
         })
         @customElement({ name: 'l-12', template: `l12 <au-viewport></au-viewport>` })
@@ -89,15 +90,19 @@ describe('router/resources/href.spec.ts', function () {
 
         @route({
           routes: [
-            { id: 'l11', path: ['', 'l11'], component: L11 },
+            { id: 'l11', path: [...getEmptyPath(), 'l11'], component: L11 },
             { id: 'l12', path: 'l12', component: L12 },
           ]
         })
         @customElement({ name: 'ro-ot', template: '<au-viewport></au-viewport>' })
         class Root { }
 
-        const { au, host } = await start({ appRoot: Root, registrations: [L11, L12, L21, L22] });
+        const { au, host, container } = await start({ appRoot: Root, registrations: [L11, L12, L21, L22] });
         await tasksSettled();
+
+        if (useEagerLoading) {
+          await container.get(IRouter).load('l11/l21');
+        }
         assert.html.textContent(host, 'l11 l21');
 
         host.querySelector('a').click();
