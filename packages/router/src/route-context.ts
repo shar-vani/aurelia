@@ -706,8 +706,9 @@ export class RouteConfigContext {
     // collect the parent paths first to prepend it to the child paths
     // traverse bottom-up and and at every level do a cartesian product and reassign the parentPaths array
     let parentPaths: string[] = [''];
-    let current = this.parent;
-    while (current !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    let current: IRouteConfigContext | null = this;
+    while (current.parent !== null) {
       parentPaths = current.config.path.flatMap(p => parentPaths.map(pp => pp.length === 0 ? p : `${p}/${pp}`));
       current = current.parent;
     }
@@ -832,21 +833,13 @@ export class RouteConfigContext {
     const parentPaths = this.parentPaths;
     const len = parentPaths?.length ?? 0;
     if (parentPaths === null || len === 0) {
-      this._recognizer.add({
-        path,
-        caseSensitive,
-        handler,
-      }, true);
+      this._recognizer.add({ path, caseSensitive, handler }, true);
       return;
     }
 
     for (let i = 0; i < len; i++) {
       const parentPath = parentPaths[i]!;
-      this._recognizer.add({
-        path: `${parentPath}/${path}`,
-        caseSensitive,
-        handler,
-      }, true);
+      this._recognizer.add({ path, caseSensitive, handler }, true, parentPath);
     }
   }
 
@@ -1085,8 +1078,14 @@ export class RouteConfigContext {
     }
   }
 
-  public recognize(path: string, searchAncestor: boolean = false): $RecognizedRoute[] | null {
+  public recognize(path: string, searchAncestor: boolean = false, parentPath: string | null = null): $RecognizedRoute[] | null {
     if (__DEV__) trace(this._logger, Events.rcRecognizePath, path);
+
+    let parentPathAppended = false;
+    if (parentPath !== null && parentPath.length !== 0 && this._options.useEagerLoading) {
+      path = `${parentPath}/${path}`;
+      parentPathAppended = true;
+    }
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     let _current: IRouteConfigContext = this;
     let _continue = true;
@@ -1098,6 +1097,22 @@ export class RouteConfigContext {
         _current = _current.parent!;
       } else {
         _continue = false;
+      }
+    }
+
+    // if parent path was appened, we need to remove those parts from the results.
+    // future optimization opportunity.
+    if (parentPathAppended) {
+      while (parentPath!.length > 0) {
+        const result = results![0];
+        const consumedPath = result.path;
+        if (parentPath!.startsWith(consumedPath)) {
+          parentPath = parentPath!.slice(consumedPath.length);
+          if (parentPath.startsWith('/')) {
+            parentPath = parentPath.slice(1);
+          }
+          results?.splice(0, 1);
+        }
       }
     }
 

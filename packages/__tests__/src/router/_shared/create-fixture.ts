@@ -7,7 +7,7 @@ import { IHIAConfig, IHookInvocationAggregator } from './hook-invocation-tracker
 import { TestRouterConfiguration } from './configuration.js';
 
 export const IActivityTracker = /*@__PURE__*/DI.createInterface<IActivityTracker>('IActivityTracker', x => x.singleton(ActivityTracker));
-export interface IActivityTracker extends ActivityTracker {}
+export interface IActivityTracker extends ActivityTracker { }
 export class ActivityTracker {
   public readonly activeVMs: string[] = [];
 
@@ -98,18 +98,35 @@ export type RouterTestStartOptions<TAppRoot> = {
   activeClass?: string | null;
   treatQueryAsParameters?: boolean;
   useEagerLoading?: boolean;
+  useNavigationModel?: boolean;
 };
 
 /**
  * Simpler fixture creation.
  */
-export async function start<TAppRoot>({ appRoot, useHash = false, registrations = [], historyStrategy = 'replace', activeClass, treatQueryAsParameters, useEagerLoading = false }: RouterTestStartOptions<TAppRoot>) {
+export async function start<TAppRoot>({
+  appRoot,
+  useHash = false,
+  registrations = [],
+  historyStrategy = 'replace',
+  activeClass,
+  treatQueryAsParameters,
+  useEagerLoading = false,
+  useNavigationModel = true
+}: RouterTestStartOptions<TAppRoot>) {
   const ctx = TestContext.create();
   const { container } = ctx;
 
   container.register(
     TestRouterConfiguration.for(LogLevel.warn),
-    RouterConfiguration.customize({ useUrlFragmentHash: useHash, historyStrategy, activeClass, treatQueryAsParameters, useEagerLoading }),
+    RouterConfiguration.customize({
+      useUrlFragmentHash: useHash,
+      historyStrategy,
+      activeClass,
+      treatQueryAsParameters,
+      useEagerLoading,
+      useNavigationModel
+    }),
     ...registrations,
   );
 

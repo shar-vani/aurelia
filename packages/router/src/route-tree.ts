@@ -440,7 +440,7 @@ export function createAndAppendNodes(
 
           let childrenRoutes: $RecognizedRoute[];
           // eslint-disable-next-line prefer-const
-          ([rr, ...childrenRoutes] = ctx.routeConfigContext.recognize(path) ?? ([null] as unknown as $RecognizedRoute[]));
+          ([rr, ...childrenRoutes] = ctx.routeConfigContext.recognize(path, false, node.instruction?.recognizedRoute?.route.path ?? null) ?? ([null] as unknown as $RecognizedRoute[]));
           log.trace('createNode recognized route: %s', rr);
           const residue = rr?.residue ?? null;
           log.trace('createNode residue:', residue);
@@ -508,7 +508,14 @@ export function createAndAppendNodes(
 
           const numRecognizedChildren = childrenRoutes.length;
           if (numRecognizedChildren > 0) {
-            vi.children.splice(0, vi.children.length, ...childrenRoutes.map((recognizedRoute) => ViewportInstruction.create({ recognizedRoute, component: recognizedRoute.route.path })));
+            // remove all children and replace with the recognized children routes
+            // as the chlidren are hierarchical, we need to build it bottom-up and add a single child to the current vi
+            let childVi: ViewportInstruction | null = null;
+            for (let i = numRecognizedChildren - 1; i >= 0; --i) {
+              const recognizedRoute = childrenRoutes[i];
+              childVi = ViewportInstruction.create({ recognizedRoute, component: recognizedRoute.route.path, children: childVi != null ? [childVi] : [] });
+            }
+            vi.children.splice(0, vi.children.length, childVi!);
           } else {
             let addResidue = !noResidue;
             for (let i = 0; i < collapse; ++i) {
